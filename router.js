@@ -8,7 +8,7 @@ router.get('/', function (req, res) {
 })
 
 router.post('/', function (req, res){
-    const newItem = { name: req.body.name }
+    const newItem = { name: req.body.name, price: req.body.price }
     items.push(newItem)
     res.status(201).json({ item: newItem})
 })
@@ -27,6 +27,7 @@ router.patch('/:name', function (req, res){
         throw new ExpressError("Item not found", 404)
     }
     foundItem.name = req.body.name
+    foundItem.price = req.body.price
     res.json( {item: foundItem} )
 })
 
