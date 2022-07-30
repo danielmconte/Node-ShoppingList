@@ -1,44 +1,38 @@
 const express = require('express');
 const ExpressError = require('./expressError');
 const router = new express.Router();
-const items = require('./fakeDb')
+const boats = require('./fakeDb')
 
 router.get('/', function (req, res) {
-    res.json({items}) 
+    res.json({boats}) 
 })
 
 router.post('/', function (req, res){
-    const newItem = { name: req.body.name, price: req.body.price }
-    items.push(newItem)
-    res.status(201).json({ item: newItem})
+    const newBoat = req.body.vesselName 
+    let slip;
+    for (let boat in boats) {
+        if(boats[boat].vacant && !boats[boat].vesselName){
+            boats[boat].vesselName = newBoat;
+            boats[boat].vacant = false;
+            slip = boats[boat].slipNumber
+            break;
+        }
+    }
+    res.json({ slipNumber: slip  || "There are no more vacancies."} )
 })
 
-router.get('/:name', function(req,res) {
-    const foundItem = items.find(item => item.name === req.params.name)
-    if(foundItem === undefined){
-        throw new ExpressError('Item was not found', 404)
+
+router.put('/:slip/vacate', function(req,res) {
+    const slipNumber =  req.params.slip;
+    if (slipNumber > 3 || !boats[slipNumber - 1].vesselName) {
+        res.json(`There is no boat docked with slip ${slipNumber}!`);
+        throw new ExpressError(`There is no boat docked with slip ${slipNumber}`, 404)
     }
-    res.json({ item: foundItem} )
+    delete boats[slipNumber - 1].vesselName;
+    boats[slipNumber -1].vacant = true; 
+    res.status(204).json();
 })
 
-router.patch('/:name', function (req, res){
-    const foundItem = items.find(item => item.name === req.params.name)
-    if(foundItem === undefined){
-        throw new ExpressError("Item not found", 404)
-    }
-    foundItem.name = req.body.name
-    foundItem.price = req.body.price
-    res.json( {item: foundItem} )
-})
-
-router.delete('/:name', function(req,res){
-    const foundItem = items.findIndex(item => item.name === req.params.name)
-    if (foundItem === -1) {
-        throw new ExpressError("Item not found", 404)
-    }
-    items.splice(foundItem, 1)
-    res.json({ message: "Deleted"})
-})
 
 
 module.exports = router;

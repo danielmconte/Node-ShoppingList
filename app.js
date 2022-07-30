@@ -3,6 +3,6 @@ const app = express();
 const routes = require('./router.js');
 
 app.use(express.json());
-app.use("/items", routes);
+app.use("/boat-slips", routes);
 
 module.exports = app;
